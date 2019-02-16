@@ -197,24 +197,24 @@
 /*
  * 字符串编码和整数编码的掩码
  */
-#define ZIP_STR_MASK 0xc0
-#define ZIP_INT_MASK 0x30
+#define ZIP_STR_MASK 0xc0           //11000000
+#define ZIP_INT_MASK 0x30           //00110000
 
 /*
  * 字符串编码类型
  */
-#define ZIP_STR_06B (0 << 6)
-#define ZIP_STR_14B (1 << 6)
-#define ZIP_STR_32B (2 << 6)
+#define ZIP_STR_06B (0 << 6)        //00000000
+#define ZIP_STR_14B (1 << 6)        //01000000
+#define ZIP_STR_32B (2 << 6)        //10000000
 
 /*
  * 整数编码类型
  */
-#define ZIP_INT_16B (0xc0 | 0<<4)
-#define ZIP_INT_32B (0xc0 | 1<<4)
-#define ZIP_INT_64B (0xc0 | 2<<4)
-#define ZIP_INT_24B (0xc0 | 3<<4)
-#define ZIP_INT_8B 0xfe
+#define ZIP_INT_16B (0xc0 | 0<<4)   //11000000
+#define ZIP_INT_32B (0xc0 | 1<<4)   //11010000
+#define ZIP_INT_64B (0xc0 | 2<<4)   //11100000
+#define ZIP_INT_24B (0xc0 | 3<<4)   //11110000
+#define ZIP_INT_8B 0xfe             //11111110
 
 /* 4 bit integer immediate encoding 
  *
@@ -311,11 +311,11 @@ address                                |                          |        |
 typedef struct zlentry {
 
     // prevrawlen ：前置节点的长度
-    // prevrawlensize ：编码 prevrawlen 所需的字节大小
+    // prevrawlensize ：编码 prevrawlen 所需的字节大小      值：1、5
     unsigned int prevrawlensize, prevrawlen;
 
     // len ：当前节点值的长度
-    // lensize ：编码 len 所需的字节大小
+    // lensize ：编码 len 所需的字节大小                    值：1、2、5
     unsigned int lensize, len;
 
     // 当前节点 header 的大小
@@ -372,6 +372,7 @@ static unsigned int zipIntSize(unsigned char encoding) {
  *
  * T = O(1)
  */
+//合并encoding和rawlen为p
 static unsigned int zipEncodeLength(unsigned char *p, unsigned char encoding, unsigned int rawlen) {
     unsigned char len = 1, buf[5];
 
