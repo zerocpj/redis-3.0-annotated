@@ -1063,6 +1063,7 @@ int zzlCompareElements(unsigned char *eptr, unsigned char *cstr, unsigned int cl
  * 返回跳跃表包含的元素数量
  */
 unsigned int zzlLength(unsigned char *zl) {
+    //值，分，值，分
     return ziplistLen(zl)/2;
 }
 
