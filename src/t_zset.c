@@ -1716,6 +1716,8 @@ void zsetConvert(robj *zobj, int encoding) {
  *----------------------------------------------------------------------------*/
 
 /* This generic command implements both ZADD and ZINCRBY. */
+//ZADD key score member [score member ...]
+//ZINCRBY key increment member
 void zaddGenericCommand(redisClient *c, int incr) {
 
     static char *nanerr = "resulting score is not a number (NaN)";
@@ -2670,6 +2672,8 @@ inline static void zunionInterAggregate(double *target, double val, int aggregat
     }
 }
 
+//ZUNIONSTORE destination numkeys key [key ...] [WEIGHTS weight] [AGGREGATE SUM|MIN|MAX]
+//ZINTERSTORE destination numkeys key [key ...] [WEIGHTS weight] [AGGREGATE SUM|MIN|MAX]
 void zunionInterGenericCommand(redisClient *c, robj *dstkey, int op) {
     int i, j;
     long setnum;
@@ -2970,6 +2974,8 @@ void zinterstoreCommand(redisClient *c) {
     zunionInterGenericCommand(c,c->argv[1], REDIS_OP_INTER);
 }
 
+//ZRANGE key start stop [WITHSCORES]
+//ZREVRANGE key start stop [WITHSCORES]
 void zrangeGenericCommand(redisClient *c, int reverse) {
     robj *key = c->argv[1];
     robj *zobj;
@@ -3090,6 +3096,8 @@ void zrevrangeCommand(redisClient *c) {
 }
 
 /* This command implements ZRANGEBYSCORE, ZREVRANGEBYSCORE. */
+//ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT offset count]
+//ZREVRANGEBYSCORE key max min [WITHSCORES] [LIMIT offset count]
 void genericZrangebyscoreCommand(redisClient *c, int reverse) {
     zrangespec range;
     robj *key = c->argv[1];
