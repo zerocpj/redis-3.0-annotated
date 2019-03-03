@@ -933,6 +933,8 @@ void shutdownCommand(redisClient *c) {
     addReplyError(c,"Errors trying to SHUTDOWN. Check logs.");
 }
 
+//Rename命令用于修改key的名称
+//Renamenx命令用于在新的key不存在时修改key的名称
 void renameGenericCommand(redisClient *c, int nx) {
     robj *o;
     long long expire;
