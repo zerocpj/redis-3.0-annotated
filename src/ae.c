@@ -300,6 +300,7 @@ long long aeCreateTimeEvent(aeEventLoop *eventLoop, long long milliseconds,
     aeAddMillisecondsToNow(milliseconds,&te->when_sec,&te->when_ms);
     // 设置事件处理器
     te->timeProc = proc;
+    // 设置清理处理器
     te->finalizerProc = finalizerProc;
     // 设置私有数据
     te->clientData = clientData;
@@ -607,6 +608,7 @@ int aeWait(int fd, int mask, long long milliseconds) {
     if (mask & AE_READABLE) pfd.events |= POLLIN;
     if (mask & AE_WRITABLE) pfd.events |= POLLOUT;
 
+    //int poll(struct pollfd fdarray[], nfds_t nfds, int timeout);
     if ((retval = poll(&pfd, 1, milliseconds))== 1) {
         if (pfd.revents & POLLIN) retmask |= AE_READABLE;
         if (pfd.revents & POLLOUT) retmask |= AE_WRITABLE;
