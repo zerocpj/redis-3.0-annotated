@@ -69,6 +69,7 @@ int listMatchObjects(void *a, void *b) {
     return equalStringObjects(a,b);
 }
 
+
 /*
  * 创建一个新客户端
  */
@@ -185,6 +186,7 @@ redisClient *createClient(int fd) {
     return c;
 }
 
+
 /* This function is called every time we are going to transmit new data
  * to the client. The behavior is the following:
  *
@@ -237,6 +239,7 @@ int prepareClientToWrite(redisClient *c) {
     return REDIS_OK;
 }
 
+
 /* Create a duplicate of the last object in the reply list when
  * it is not exclusively owned by the reply list. */
 // 当回复列表中的最后一个对象并非属于回复的一部分时
@@ -254,6 +257,7 @@ robj *dupLastObjectIfNeeded(list *reply) {
     }
     return listNodeValue(ln);
 }
+
 
 /* -----------------------------------------------------------------------------
  * Low level functions to add more data to output buffers.
@@ -283,6 +287,7 @@ int _addReplyToBuffer(redisClient *c, char *s, size_t len) {
 
     return REDIS_OK;
 }
+
 
 /*
  * 将回复对象（一个 SDS ）添加到 c->reply 回复链表中
@@ -330,6 +335,7 @@ void _addReplyObjectToList(redisClient *c, robj *o) {
     // 检查回复缓冲区的大小，如果超过系统限制的话，那么关闭客户端
     asyncCloseClientOnOutputBufferLimitReached(c);
 }
+
 
 /* This method takes responsibility over the sds. When it is no longer
  * needed it will be free'd, otherwise it ends up in a robj. */
@@ -399,6 +405,7 @@ void _addReplyStringToList(redisClient *c, char *s, size_t len) {
     asyncCloseClientOnOutputBufferLimitReached(c);
 }
 
+
 /* -----------------------------------------------------------------------------
  * Higher level functions to queue data on the client output buffer.
  * The following functions are the ones that commands implementations will call.
@@ -455,6 +462,7 @@ void addReply(redisClient *c, robj *obj) {
         redisPanic("Wrong obj->encoding in addReply()");
     }
 }
+
 
 /*
  * 将 SDS 中的内容复制到回复缓冲区
@@ -745,6 +753,7 @@ void copyClientOutputBuffer(redisClient *dst, redisClient *src) {
     dst->reply_bytes = src->reply_bytes;
 }
 
+
 /*
  * TCP 连接 accept 处理器
  */
@@ -788,6 +797,7 @@ static void acceptCommonHandler(int fd, int flags) {
     c->flags |= flags;
 }
 
+
 /* 
  * 创建一个 TCP 连接处理器
  */
@@ -812,6 +822,7 @@ void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
         acceptCommonHandler(cfd,0);
     }
 }
+
 
 /*
  * 创建一个本地连接处理器
@@ -1039,6 +1050,7 @@ void freeClientsInAsyncFreeQueue(void) {
     }
 }
 
+
 /*
  * 负责传送命令回复的写处理器
  */
@@ -1168,6 +1180,7 @@ void sendReplyToClient(aeEventLoop *el, int fd, void *privdata, int mask) {
     }
 }
 
+
 /* resetClient prepare the client to process the next command */
 // 在客户端执行完命令之后执行：重置客户端以准备执行下个命令
 void resetClient(redisClient *c) {
@@ -1182,6 +1195,7 @@ void resetClient(redisClient *c) {
     if (!(c->flags & REDIS_MULTI) && prevcmd != askingCommand)
         c->flags &= (~REDIS_ASKING);
 }
+
 
 /*
  * 处理内联命令，并创建参数对象
@@ -1273,6 +1287,7 @@ int processInlineBuffer(redisClient *c) {
     return REDIS_OK;
 }
 
+
 /* Helper function. Trims query buffer to make the function that processes
  * multi bulk requests idempotent. */
 // 如果在读入协议内容时，发现内容不符合协议，那么异步地关闭这个客户端。
@@ -1286,6 +1301,10 @@ static void setProtocolError(redisClient *c, int pos) {
     c->flags |= REDIS_CLOSE_AFTER_REPLY;
     sdsrange(c->querybuf,pos,-1);
 }
+
+
+//*<count>\r\n
+//$<length>\r\n<content>\r\n
 
 /*
  * 将 c->querybuf 中的协议内容转换成 c->argv 中的参数对象
@@ -1481,6 +1500,7 @@ int processMultibulkBuffer(redisClient *c) {
     return REDIS_ERR;
 }
 
+
 // 处理客户端输入的命令内容
 void processInputBuffer(redisClient *c) {
 
@@ -1541,6 +1561,7 @@ void processInputBuffer(redisClient *c) {
         }
     }
 }
+
 
 /*
  * 读取客户端的查询缓冲区内容
@@ -1632,6 +1653,7 @@ void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask) {
 
     server.current_client = NULL;
 }
+
 
 // 获取客户端目前最大的一块缓冲区的大小
 void getClientsMaxBuffers(unsigned long *longest_output_list,
@@ -1989,6 +2011,7 @@ char *getClientLimitClassName(int class) {
     }
 }
 
+
 /* The function checks if the client reached output buffer soft or hard
  * limit, and also update the state needed to check the soft limit as
  * a side effect.
@@ -2055,6 +2078,7 @@ int checkClientOutputBufferLimits(redisClient *c) {
     return soft || hard;
 }
 
+
 /* Asynchronously close a client if soft or hard limit is reached on the
  * output buffer size. The caller can check if the client will be closed
  * checking if the client REDIS_CLOSE_ASAP flag is set.
@@ -2086,6 +2110,7 @@ void asyncCloseClientOnOutputBufferLimitReached(redisClient *c) {
         sdsfree(client);
     }
 }
+
 
 /* Helper function used by freeMemoryIfNeeded() in order to flush slaves
  * output buffers without returning control to the event loop. */
