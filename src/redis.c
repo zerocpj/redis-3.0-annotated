@@ -2151,6 +2151,7 @@ void initServer() {
     server.repl_good_slaves_count = 0;
     updateCachedTime();
 
+
     /* Create the serverCron() time event, that's our main way to process
      * background operations. */
     // 为 serverCron() 创建时间事件
