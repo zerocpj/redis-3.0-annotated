@@ -131,6 +131,8 @@ int anetKeepAlive(char *err, int fd, int interval)
     return ANET_OK;
 }
 
+//nagle算法用于处理小报文段（微小分组）的发送问题
+//nagle算法的核心思想是允许网络中最多只能有一个小分组被发送，而待发送的其它小分组会被重新分组成一个”较大的”小分组，等收到上一个小分组的应答后再发送
 /*
  * 打开或关闭 Nagle 算法
  */
