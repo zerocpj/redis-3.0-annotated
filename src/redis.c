@@ -1164,6 +1164,7 @@ int clientsCronResizeQueryBuffer(redisClient *c) {
     return 0;
 }
 
+
 void clientsCron(void) {
     /* Make sure to process at least 1/(server.hz*10) of clients per call.
      *
@@ -1212,6 +1213,7 @@ void clientsCron(void) {
         if (clientsCronResizeQueryBuffer(c)) continue;
     }
 }
+
 
 /* This function handles 'background' operations we are required to do
  * incrementally in Redis databases, such as active key expiring, resizing,
@@ -1276,6 +1278,7 @@ void updateCachedTime(void) {
     server.unixtime = time(NULL);
     server.mstime = mstime();
 }
+
 
 /* This is our timer interrupt, called server.hz times per second.
  *
@@ -1561,6 +1564,7 @@ int serverCron(struct aeEventLoop *eventLoop, long long id, void *clientData) {
 
     return 1000/server.hz;
 }
+
 
 /* This function gets called every time Redis is entering the
  * main loop of the event driven library, that is, before to sleep
@@ -2080,11 +2084,13 @@ void initServer() {
     server.el = aeCreateEventLoop(server.maxclients+REDIS_EVENTLOOP_FDSET_INCR);
     server.db = zmalloc(sizeof(redisDb)*server.dbnum);
 
+
     /* Open the TCP listening socket for the user commands. */
     // 打开 TCP 监听端口，用于等待客户端的命令请求
     if (server.port != 0 &&
         listenToPort(server.port,server.ipfd,&server.ipfd_count) == REDIS_ERR)
         exit(1);
+
 
     /* Open the listening Unix domain socket. */
     // 打开 UNIX 本地端口
@@ -2145,6 +2151,7 @@ void initServer() {
     server.repl_good_slaves_count = 0;
     updateCachedTime();
 
+
     /* Create the serverCron() time event, that's our main way to process
      * background operations. */
     // 为 serverCron() 创建时间事件
@@ -2152,6 +2159,7 @@ void initServer() {
         redisPanic("Can't create the serverCron time event.");
         exit(1);
     }
+
 
     /* Create an event handler for accepting new connections in TCP and Unix
      * domain sockets. */
@@ -2165,6 +2173,7 @@ void initServer() {
                     "Unrecoverable error creating server.ipfd file event.");
             }
     }
+
 
     // 为本地套接字关联应答处理器
     if (server.sofd > 0 && aeCreateFileEvent(server.el,server.sofd,AE_READABLE,
@@ -2515,6 +2524,7 @@ void call(redisClient *c, int flags) {
     server.stat_numcommands++;
 }
 
+
 /* If this function gets called we already read a whole
  * command, arguments are in the client argv/argc fields.
  * processCommand() execute the command or prepare the
@@ -2773,6 +2783,7 @@ int processCommand(redisClient *c) {
 
     return REDIS_OK;
 }
+
 
 /*================================== Shutdown =============================== */
 
