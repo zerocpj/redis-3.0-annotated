@@ -265,6 +265,7 @@ void memtest_non_destructive_swap(void *addr, size_t size) {
     }
 }
 
+
 void memtest(size_t megabytes, int passes) {
     if (ioctl(1, TIOCGWINSZ, &ws) == -1) {
         ws.ws_col = 80;

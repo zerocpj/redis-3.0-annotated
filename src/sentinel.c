@@ -363,6 +363,7 @@ typedef struct sentinelRedisInstance {
 
 } sentinelRedisInstance;
 
+
 /* Main state. */
 /* Sentinel 的状态结构 */
 struct sentinelState {
@@ -393,6 +394,7 @@ struct sentinelState {
     list *scripts_queue;    /* Queue of user scripts to execute. */
 
 } sentinel;
+
 
 /* A script execution job. */
 // 脚本运行状态
@@ -626,12 +628,14 @@ struct redisCommand sentinelcmds[] = {
     {"shutdown",shutdownCommand,-1,"",0,NULL,0,0,0,0,0}
 };
 
+
 /* This function overwrites a few normal Redis config default with Sentinel
  * specific defaults. */
 // 这个函数会用 Sentinel 所属的属性覆盖服务器默认的属性
 void initSentinelConfig(void) {
     server.port = REDIS_SENTINEL_PORT;
 }
+
 
 /* Perform the Sentinel mode initialization. */
 // 以 Sentinel 模式初始化服务器
@@ -669,6 +673,7 @@ void initSentinel(void) {
     sentinel.running_scripts = 0;
     sentinel.scripts_queue = listCreate();
 }
+
 
 /* This function gets called when the server is in Sentinel mode, started,
  * loaded the configuration, and is ready for normal operations. */

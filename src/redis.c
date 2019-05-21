@@ -62,6 +62,7 @@ struct sharedObjectsStruct shared;
 
 double R_Zero, R_PosInf, R_NegInf, R_Nan;
 
+
 /*================================= Globals ================================= */
 
 /* Global vars */
@@ -178,6 +179,7 @@ struct redisCommand *commandTable;
  *    使得在集群模式下，一个被标示为 importing 的槽可以接收这命令。
  */
 struct redisCommand redisCommandTable[] = {
+    //name, proc, arity, sflags, flags, getkeys_proc, firstkey, lastkey, keystep, microseconds, calls
     {"get",getCommand,2,"r",0,NULL,1,1,1,0,0},
     {"set",setCommand,-3,"wm",0,NULL,1,1,1,0,0},
     {"setnx",setnxCommand,3,"wm",0,NULL,1,1,1,0,0},
@@ -342,6 +344,7 @@ struct redisCommand redisCommandTable[] = {
 
 struct evictionPoolEntry *evictionPoolAlloc(void);
 
+
 /*============================ Utility functions ============================ */
 
 /* Low level logging. To use only for very big messages, otherwise
@@ -422,6 +425,7 @@ err:
     if (!log_to_stdout) close(fd);
 }
 
+
 /* Return the UNIX time in microseconds */
 // 返回微秒格式的 UNIX 时间
 // 1 秒 = 1 000 000 微秒
@@ -435,12 +439,14 @@ long long ustime(void) {
     return ust;
 }
 
+
 /* Return the UNIX time in milliseconds */
 // 返回毫秒格式的 UNIX 时间
 // 1 秒 = 1 000 毫秒
 long long mstime(void) {
     return ustime()/1000;
 }
+
 
 /* After an RDB dump or AOF rewrite we exit from children using _exit() instead of
  * exit(), because the latter may interact with the same file objects used by
@@ -1270,6 +1276,7 @@ void databasesCron(void) {
     }
 }
 
+
 /* We take a cached value of the unix time in the global state because with
  * virtual memory and aging there is to store the current time in objects at
  * every object access, and accuracy is not needed. To access a global var is
@@ -1612,6 +1619,7 @@ void beforeSleep(struct aeEventLoop *eventLoop) {
     if (server.cluster_enabled) clusterBeforeSleep();
 }
 
+
 /* =========================== Server initialization ======================== */
 
 void createSharedObjects(void) {
@@ -1717,6 +1725,7 @@ void createSharedObjects(void) {
     shared.maxstring = createStringObject("maxstring",9);
 }
 
+
 void initServerConfig() {
     int j;
 
@@ -1769,9 +1778,11 @@ void initServerConfig() {
     server.aof_selected_db = -1; /* Make sure the first time will not match */
     server.aof_flush_postponed_start = 0;
     server.aof_rewrite_incremental_fsync = REDIS_DEFAULT_AOF_REWRITE_INCREMENTAL_FSYNC;
+
     server.pidfile = zstrdup(REDIS_DEFAULT_PID_FILE);
     server.rdb_filename = zstrdup(REDIS_DEFAULT_RDB_FILENAME);
     server.aof_filename = zstrdup(REDIS_DEFAULT_AOF_FILENAME);
+
     server.requirepass = NULL;
     server.rdb_compression = REDIS_DEFAULT_RDB_COMPRESSION;
     server.rdb_checksum = REDIS_DEFAULT_RDB_CHECKSUM;
@@ -1884,6 +1895,7 @@ void initServerConfig() {
     server.watchdog_period = 0;
 }
 
+
 /* This function will try to raise the max number of open files accordingly to
  * the configured max number of clients. It also reserves a number of file
  * descriptors (REDIS_MIN_RESERVED_FDS) for extra operations of
@@ -1964,6 +1976,7 @@ void adjustOpenFilesLimit(void) {
     }
 }
 
+
 /* Initialize a set of file descriptors to listen to the specified 'port'
  * binding the addresses specified in the Redis server configuration.
  *
@@ -2030,6 +2043,7 @@ int listenToPort(int port, int *fds, int *count) {
     return REDIS_OK;
 }
 
+
 /* Resets the stats that we expose via INFO or other means that we want
  * to reset via CONFIG RESETSTAT. The function is also used in order to
  * initialize these fields in initServer() at server startup. */
@@ -2050,6 +2064,7 @@ void resetServerStats(void) {
     server.ops_sec_last_sample_time = mstime();
     server.ops_sec_last_sample_ops = 0;
 }
+
 
 void initServer() {
     int j;
@@ -2081,7 +2096,11 @@ void initServer() {
     // 创建共享对象
     createSharedObjects();
     adjustOpenFilesLimit();
+
+
     server.el = aeCreateEventLoop(server.maxclients+REDIS_EVENTLOOP_FDSET_INCR);
+
+
     server.db = zmalloc(sizeof(redisDb)*server.dbnum);
 
 
@@ -2104,6 +2123,7 @@ void initServer() {
         }
         anetNonBlock(NULL,server.sofd);
     }
+
 
     /* Abort if there are no listening sockets at all. */
     if (server.ipfd_count == 0 && server.sofd < 0) {
@@ -2179,6 +2199,7 @@ void initServer() {
     if (server.sofd > 0 && aeCreateFileEvent(server.el,server.sofd,AE_READABLE,
         acceptUnixHandler,NULL) == AE_ERR) redisPanic("Unrecoverable error creating server.sofd file event.");
 
+
     /* Open the AOF file if needed. */
     // 如果 AOF 持久化功能已经打开，那么打开或创建一个 AOF 文件
     if (server.aof_state == REDIS_AOF_ON) {
@@ -2190,6 +2211,7 @@ void initServer() {
             exit(1);
         }
     }
+
 
     /* 32 bit instances are limited to 4GB of address space, so if there is
      * no explicit limit in the user provided configuration we set a limit
@@ -2217,6 +2239,7 @@ void initServer() {
     // 初始化 BIO 系统
     bioInit();
 }
+
 
 /* Populates the Redis Command Table starting from the hard coded list
  * we have on top of redis.c file. 
@@ -2274,6 +2297,7 @@ void populateCommandTable(void) {
         redisAssert(retval1 == DICT_OK && retval2 == DICT_OK);
     }
 }
+
 
 /*
  * 重置命令表中的统计信息
@@ -2339,6 +2363,7 @@ struct redisCommand *lookupCommand(sds name) {
     return dictFetchValue(server.commands, name);
 }
 
+
 /*
  * 根据给定命令名字（C 字符串），查找命令
  */
@@ -2350,6 +2375,7 @@ struct redisCommand *lookupCommandByCString(char *s) {
     sdsfree(name);
     return cmd;
 }
+
 
 /* Lookup the command in the current table, if not found also check in
  * the original table containing the original command names unaffected by
@@ -3784,6 +3810,7 @@ void createPidFile(void) {
     }
 }
 
+
 void daemonize(void) {
     int fd;
 
@@ -3801,6 +3828,7 @@ void daemonize(void) {
     }
 }
 
+
 void version() {
     printf("Redis server v=%s sha=%s:%d malloc=%s bits=%d build=%llx\n",
         REDIS_VERSION,
@@ -3811,6 +3839,7 @@ void version() {
         (unsigned long long) redisBuildId());
     exit(0);
 }
+
 
 void usage() {
     fprintf(stderr,"Usage: ./redis-server [/path/to/redis.conf] [options]\n");
@@ -3828,6 +3857,7 @@ void usage() {
     fprintf(stderr,"       ./redis-server /etc/sentinel.conf --sentinel\n");
     exit(1);
 }
+
 
 void redisAsciiArt(void) {
 #include "asciilogo.h"
@@ -3859,6 +3889,7 @@ static void sigtermHandler(int sig) {
     server.shutdown_asap = 1;
 }
 
+
 void setupSignalHandlers(void) {
     struct sigaction act;
 
@@ -3881,7 +3912,9 @@ void setupSignalHandlers(void) {
     return;
 }
 
+
 void memtest(size_t megabytes, int passes);
+
 
 /* Returns 1 if there is --sentinel among the arguments or if
  * argv[0] is exactly "redis-sentinel". */
@@ -3893,6 +3926,7 @@ int checkForSentinelMode(int argc, char **argv) {
         if (!strcmp(argv[j],"--sentinel")) return 1;
     return 0;
 }
+
 
 /* Function called at startup to load RDB or AOF file in memory. */
 void loadDataFromDisk(void) {
@@ -3941,6 +3975,7 @@ void redisSetProcTitle(char *title) {
 #endif
 }
 
+
 int main(int argc, char **argv) {
     struct timeval tv;
 
@@ -3956,11 +3991,14 @@ int main(int argc, char **argv) {
     gettimeofday(&tv,NULL);
     dictSetHashFunctionSeed(tv.tv_sec^tv.tv_usec^getpid());
 
+
     // 检查服务器是否以 Sentinel 模式启动
     server.sentinel_mode = checkForSentinelMode(argc,argv);
 
+
     // 初始化服务器
     initServerConfig();
+
 
     /* We need to init sentinel right now as parsing the configuration file
      * in sentinel mode will have the effect of populating the sentinel
@@ -3971,6 +4009,7 @@ int main(int argc, char **argv) {
         initSentinelConfig();
         initSentinel();
     }
+
 
     // 检查用户是否指定了配置文件，或者配置选项
     if (argc >= 2) {
@@ -4034,11 +4073,14 @@ int main(int argc, char **argv) {
         redisLog(REDIS_WARNING, "Warning: no config file specified, using the default config. In order to specify a config file use %s /path/to/%s.conf", argv[0], server.sentinel_mode ? "sentinel" : "redis");
     }
 
+
     // 将服务器设置为守护进程
     if (server.daemonize) daemonize();
 
+
     // 创建并初始化服务器数据结构
     initServer();
+
 
     // 如果服务器是守护进程，那么创建 PID 文件
     if (server.daemonize) createPidFile();

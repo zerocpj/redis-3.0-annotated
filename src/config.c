@@ -66,6 +66,7 @@ int yesnotoi(char *s) {
     else return -1;
 }
 
+
 void appendServerSaveParams(time_t seconds, int changes) {
     server.saveparams = zrealloc(server.saveparams,sizeof(struct saveparam)*(server.saveparamslen+1));
     server.saveparams[server.saveparamslen].seconds = seconds;
@@ -73,11 +74,13 @@ void appendServerSaveParams(time_t seconds, int changes) {
     server.saveparamslen++;
 }
 
+
 void resetServerSaveParams() {
     zfree(server.saveparams);
     server.saveparams = NULL;
     server.saveparamslen = 0;
 }
+
 
 void loadServerConfigFromString(char *config) {
     char *err = NULL;
@@ -537,6 +540,7 @@ loaderr:
     exit(1);
 }
 
+
 /* Load the server configuration from the specified filename.
  *
  * 从给定文件中载入服务器配置。
@@ -588,6 +592,7 @@ void loadServerConfig(char *filename, char *options) {
 
     sdsfree(config);
 }
+
 
 /*-----------------------------------------------------------------------------
  * CONFIG SET implementation

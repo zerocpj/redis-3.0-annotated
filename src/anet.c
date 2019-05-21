@@ -60,6 +60,7 @@ static void anetSetError(char *err, const char *fmt, ...)
     va_end(ap);
 }
 
+
 /*
  * 将 fd 设置为非阻塞模式（O_NONBLOCK）
  */
@@ -80,6 +81,7 @@ int anetNonBlock(char *err, int fd)
     }
     return ANET_OK;
 }
+
 
 /* Set TCP keep alive option to detect dead peers. The interval option
  * is only used for Linux as we are using Linux-specific APIs to set
@@ -435,6 +437,7 @@ int anetWrite(int fd, char *buf, int count)
     return totlen;
 }
 
+
 /*
  * 绑定并创建监听套接字
  */
@@ -452,6 +455,7 @@ static int anetListen(char *err, int s, struct sockaddr *sa, socklen_t len, int 
     }
     return ANET_OK;
 }
+
 
 static int anetV6Only(char *err, int s) {
     int yes = 1;
@@ -509,6 +513,7 @@ int anetTcp6Server(char *err, int port, char *bindaddr, int backlog)
 {
     return _anetTcpServer(err, port, bindaddr, AF_INET6, backlog);
 }
+
 
 /*
  * 创建一个本地连接用的服务器监听套接字
