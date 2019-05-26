@@ -42,6 +42,7 @@
 
 #define REDIS_SYNCIO_RESOLUTION 10 /* Resolution in milliseconds */
 
+
 /* Write the specified payload to 'fd'. If writing the whole payload will be
  * done within 'timeout' milliseconds the operation succeeds and 'size' is
  * returned. Otherwise the operation fails, -1 is returned, and an unspecified
@@ -77,6 +78,7 @@ ssize_t syncWrite(int fd, char *ptr, ssize_t size, long long timeout) {
         remaining = timeout - elapsed;
     }
 }
+
 
 /* Read the specified amount of bytes from 'fd'. If all the bytes are read
  * within 'timeout' milliseconds the operation succeed and 'size' is returned.
@@ -116,6 +118,7 @@ ssize_t syncRead(int fd, char *ptr, ssize_t size, long long timeout) {
         remaining = timeout - elapsed;
     }
 }
+
 
 /* Read a line making sure that every char will not require more than 'timeout'
  * milliseconds to be read.

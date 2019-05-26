@@ -43,7 +43,9 @@ void replicationDiscardCachedMaster(void);
 void replicationResurrectCachedMaster(int newfd);
 void replicationSendAck(void);
 
+
 /* ---------------------------------- MASTER -------------------------------- */
+
 
 // 创建 backlog
 void createReplicationBacklog(void) {
@@ -71,6 +73,7 @@ void createReplicationBacklog(void) {
     // 但 backlog 第一个字节的逻辑位置应该是 repl_offset 后的第一个字节
     server.repl_backlog_off = server.master_repl_offset+1;
 }
+
 
 /* This function is called when the user modifies the replication backlog
  * size at runtime. It is up to the function to both update the
@@ -109,12 +112,14 @@ void resizeReplicationBacklog(long long newsize) {
     }
 }
 
+
 // 释放 backlog
 void freeReplicationBacklog(void) {
     redisAssert(listLength(server.slaves) == 0);
     zfree(server.repl_backlog);
     server.repl_backlog = NULL;
 }
+
 
 /* Add data to the replication backlog.
  * This function also increments the global replication offset stored at
@@ -175,6 +180,7 @@ void feedReplicationBacklog(void *ptr, size_t len) {
                               server.repl_backlog_histlen + 1;
 }
 
+
 /* Wrapper for feedReplicationBacklog() that takes Redis string objects
  * as input. */
 // 将 Redis 对象放进 replication backlog 里面
@@ -192,6 +198,7 @@ void feedReplicationBacklogWithObject(robj *o) {
     }
     feedReplicationBacklog(p,len);
 }
+
 
 // 将传入的参数发送给从服务器
 // 操作分为三步：
@@ -305,6 +312,7 @@ void replicationFeedSlaves(list *slaves, int dictid, robj **argv, int argc) {
     }
 }
 
+
 // 将协议发给 Monitor
 void replicationFeedMonitors(redisClient *c, list *monitors, int dictid, robj **argv, int argc) {
     listNode *ln;
@@ -348,6 +356,7 @@ void replicationFeedMonitors(redisClient *c, list *monitors, int dictid, robj **
     decrRefCount(cmdobj);
 }
 
+
 /* Feed the slave 'c' with the replication backlog starting from the
  * specified 'offset' up to the end of the backlog. */
 // 向从服务器 c 发送 backlog 中从 offset 到 backlog 尾部之间的数据
@@ -370,10 +379,12 @@ long long addReplyReplicationBacklog(redisClient *c, long long offset) {
     redisLog(REDIS_DEBUG, "[PSYNC] Current index: %lld",
              server.repl_backlog_idx);
 
+    //要丢弃的字节数
     /* Compute the amount of bytes we need to discard. */
     skip = offset - server.repl_backlog_off;
     redisLog(REDIS_DEBUG, "[PSYNC] Skipping: %lld", skip);
 
+    //第一个字节位置
     /* Point j to the oldest byte, that is actaully our
      * server.repl_backlog_off byte. */
     j = (server.repl_backlog_idx +
@@ -400,6 +411,7 @@ long long addReplyReplicationBacklog(redisClient *c, long long offset) {
     }
     return server.repl_backlog_histlen - skip;
 }
+
 
 /* This function handles the PSYNC command from the point of view of a
  * master receiving a request for partial resynchronization.
@@ -510,6 +522,7 @@ need_full_resync:
     }
     return REDIS_ERR;
 }
+
 
 /* SYNC ad PSYNC command implemenation. */
 void syncCommand(redisClient *c) {
@@ -651,6 +664,7 @@ void syncCommand(redisClient *c) {
     return;
 }
 
+
 /* REPLCONF <option> <value> <option> <value> ...
  * This command is used by a slave in order to configure the replication
  * process before starting it with the SYNC command.
@@ -731,6 +745,7 @@ void replconfCommand(redisClient *c) {
     addReply(c,shared.ok);
 }
 
+
 // master 将 RDB 文件发送给 slave 的写事件处理器
 void sendBulkToSlave(aeEventLoop *el, int fd, void *privdata, int mask) {
     redisClient *slave = privdata;
@@ -807,6 +822,7 @@ void sendBulkToSlave(aeEventLoop *el, int fd, void *privdata, int mask) {
         redisLog(REDIS_NOTICE,"Synchronization with slave succeeded");
     }
 }
+
 
 /* This function is called at the end of every background saving.
  * 在每次 BGSAVE 执行完毕之后使用
@@ -901,6 +917,7 @@ void updateSlavesWaitingBgsave(int bgsaveerr) {
     }
 }
 
+
 /* ----------------------------------- SLAVE -------------------------------- */
 
 /* Abort the async download of the bulk dataset while SYNC-ing with master */
@@ -915,6 +932,7 @@ void replicationAbortSyncTransfer(void) {
     zfree(server.repl_transfer_tmpfile);
     server.repl_state = REDIS_REPL_CONNECT;
 }
+
 
 /* Avoid the master to detect the slave is timing out while loading the
  * RDB file in initial synchronization. We send a single newline character
@@ -934,12 +952,14 @@ void replicationSendNewlineToMaster(void) {
     }
 }
 
+
 /* Callback used by emptyDb() while flushing away old data to load
  * the new dataset received by the master. */
 void replicationEmptyDbCallback(void *privdata) {
     REDIS_NOTUSED(privdata);
     replicationSendNewlineToMaster();
 }
+
 
 /* Asynchronously read the SYNC payload we receive from a master */
 // 异步 RDB 文件读取函数
@@ -1116,6 +1136,7 @@ error:
     return;
 }
 
+
 /* Send a synchronous command to the master. Used to send AUTH and
  * REPLCONF commands before starting the replication with SYNC.
  *
@@ -1159,6 +1180,7 @@ char *sendSynchronousCommand(int fd, ...) {
     }
     return sdsnew(buf);
 }
+
 
 /* Try a partial resynchronization with the master if we are about to reconnect.
  *
@@ -1312,6 +1334,7 @@ int slaveTryPartialResynchronization(int fd) {
     return PSYNC_NOT_SUPPORTED;
 }
 
+
 // 从服务器用于同步主服务器的回调函数
 void syncWithMaster(aeEventLoop *el, int fd, void *privdata, int mask) {
     char tmpfile[256], *err;
@@ -1341,6 +1364,7 @@ void syncWithMaster(aeEventLoop *el, int fd, void *privdata, int mask) {
         goto error;
     }
 
+
     /* If we were connecting, it's time to send a non blocking PING, we want to
      * make sure the master is able to reply before going into the actual
      * replication process where we have long timeouts in the order of
@@ -1364,6 +1388,7 @@ void syncWithMaster(aeEventLoop *el, int fd, void *privdata, int mask) {
         // 返回，等待 PONG 到达
         return;
     }
+
 
     /* Receive the PONG command. */
     // 接收 PONG 命令
@@ -1409,6 +1434,7 @@ void syncWithMaster(aeEventLoop *el, int fd, void *privdata, int mask) {
         }
     }
 
+
     /* AUTH with the master if required. */
     // 进行身份验证
     if(server.masterauth) {
@@ -1420,6 +1446,7 @@ void syncWithMaster(aeEventLoop *el, int fd, void *privdata, int mask) {
         }
         sdsfree(err);
     }
+
 
     /* Set the slave port, so that Master's INFO command can list the
      * slave listening port correctly. */
@@ -1437,6 +1464,7 @@ void syncWithMaster(aeEventLoop *el, int fd, void *privdata, int mask) {
         }
         sdsfree(err);
     }
+
 
     /* Try a partial resynchonization. If we don't have a cached master
      * slaveTryPartialResynchronization() will at least try to use PSYNC
@@ -1515,6 +1543,7 @@ error:
     return;
 }
 
+
 // 以非阻塞方式连接主服务器
 int connectWithMaster(void) {
     int fd;
@@ -1546,6 +1575,7 @@ int connectWithMaster(void) {
     return REDIS_OK;
 }
 
+
 /* This function can be called when a non blocking connection is currently
  * in progress to undo it. */
 // 取消正在进行的连接
@@ -1561,6 +1591,7 @@ void undoConnectWithMaster(void) {
     // 回到 CONNECT 状态
     server.repl_state = REDIS_REPL_CONNECT;
 }
+
 
 /* This function aborts a non blocking replication attempt if there is one
  * in progress, by canceling the non-blocking connect attempt or
@@ -1590,6 +1621,7 @@ int cancelReplicationHandshake(void) {
     }
     return 1;
 }
+
 
 /* Set replication to the specified master address and port. */
 // 将服务器设为指定地址的从服务器
@@ -1623,6 +1655,7 @@ void replicationSetMaster(char *ip, int port) {
     server.repl_down_since = 0;
 }
 
+
 /* Cancel replication, setting the instance as a master itself. */
 // 取消复制，将服务器设置为主服务器
 void replicationUnsetMaster(void) {
@@ -1650,6 +1683,7 @@ void replicationUnsetMaster(void) {
 
     server.repl_state = REDIS_REPL_NONE;
 }
+
 
 void slaveofCommand(redisClient *c) {
     /* SLAVEOF is not allowed in cluster mode as replication is automatically
@@ -1698,6 +1732,7 @@ void slaveofCommand(redisClient *c) {
     addReply(c,shared.ok);
 }
 
+
 /* Send a REPLCONF ACK command to the master to inform it about the current
  * processed offset. If we are not connected with a master, the command has
  * no effects. */
@@ -1717,6 +1752,7 @@ void replicationSendAck(void) {
     }
 }
 
+
 /* ---------------------- MASTER CACHING FOR PSYNC -------------------------- */
 
 /* In order to implement partial synchronization we need to be able to cache
@@ -1730,6 +1766,7 @@ void replicationSendAck(void) {
  *
  * 以下是该 cache 的设置和清除函数。
  */
+
 
 /* This function is called by freeClient() in order to cache the master
  * client structure instead of destryoing it. freeClient() will return
@@ -1796,6 +1833,7 @@ void replicationCacheMaster(redisClient *c) {
     replicationHandleMasterDisconnection();
 }
 
+
 /* Free a cached master, called when there are no longer the conditions for
  * a partial resync on reconnection. 
  *
@@ -1810,6 +1848,7 @@ void replicationDiscardCachedMaster(void) {
     freeClient(server.cached_master);
     server.cached_master = NULL;
 }
+
 
 /* Turn the cached master into the current master, using the file descriptor
  * passed as argument as the socket for the new master.
@@ -1860,6 +1899,7 @@ void replicationResurrectCachedMaster(int newfd) {
     }
 }
 
+
 /* ------------------------- MIN-SLAVES-TO-WRITE  --------------------------- */
 
 /* This function counts the number of slaves with lag <= min-slaves-max-lag.
@@ -1895,6 +1935,7 @@ void refreshGoodSlavesCount(void) {
     // 更新状态良好的从服务器数量
     server.repl_good_slaves_count = good;
 }
+
 
 /* ----------------------- REPLICATION SCRIPT CACHE --------------------------
  * The goal of this code is to keep track of scripts already sent to every
@@ -1973,6 +2014,7 @@ void replicationScriptCacheInit(void) {
     server.repl_scriptcache_fifo = listCreate();
 }
 
+
 /* Empty the script cache. Should be called every time we are no longer sure
  * that every slave knows about all the scripts in our set, or when the
  * current AOF "context" is no longer aware of the script. In general we
@@ -1996,6 +2038,7 @@ void replicationScriptCacheFlush(void) {
     listRelease(server.repl_scriptcache_fifo);
     server.repl_scriptcache_fifo = listCreate();
 }
+
 
 /* Add an entry into the script cache, if we reach max number of entries the
  * oldest is removed from the list. 
@@ -2026,12 +2069,14 @@ void replicationScriptCacheAdd(sds sha1) {
     redisAssert(retval == DICT_OK);
 }
 
+
 /* Returns non-zero if the specified entry exists inside the cache, that is,
  * if all the slaves are aware of this script SHA1. */
 // 如果脚本存在于脚本，那么返回 1 ；否则，返回 0 。
 int replicationScriptCacheExists(sds sha1) {
     return dictFind(server.repl_scriptcache_dict,sha1) != NULL;
 }
+
 
 /* ----------------------- SYNCHRONOUS REPLICATION --------------------------
  * Redis synchronous replication design can be summarized in points:
@@ -2181,6 +2226,7 @@ long long replicationGetSlaveOffset(void) {
     if (offset < 0) offset = 0;
     return offset;
 }
+
 
 /* --------------------------- REPLICATION CRON  ---------------------------- */
 

@@ -860,6 +860,7 @@ static void freeClientArgv(redisClient *c) {
     c->cmd = NULL;
 }
 
+
 /* Close all the slaves connections. This is useful in chained replication
  * when we resync with our own master and want to force all our slaves to
  * resync with us as well. */
@@ -870,6 +871,7 @@ void disconnectSlaves(void) {
         freeClient((redisClient*)ln->value);
     }
 }
+
 
 /* This function is called when the slave lose the connection with the
  * master into an unexpected way. */
@@ -892,6 +894,7 @@ void replicationHandleMasterDisconnection(void) {
      */
     if (server.masterhost != NULL) disconnectSlaves();
 }
+
 
 /*
  * 释放客户端
@@ -1023,6 +1026,7 @@ void freeClient(redisClient *c) {
     // 释放客户端 redisClient 结构本身
     zfree(c);
 }
+
 
 /* Schedule a client to free it at a safe time in the serverCron() function.
  * This function is useful when we need to terminate a client but we are in

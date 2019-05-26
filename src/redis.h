@@ -259,6 +259,7 @@
 #define REDIS_CLIENT_LIMIT_CLASS_PUBSUB 2
 #define REDIS_CLIENT_LIMIT_NUM_CLASSES 3
 
+
 /* Slave replication state - from the point of view of the slave. */
 #define REDIS_REPL_NONE 0 /* No active replication */
 #define REDIS_REPL_CONNECT 1 /* Must connect to master */
@@ -266,6 +267,7 @@
 #define REDIS_REPL_RECEIVE_PONG 3 /* Wait for PING reply */
 #define REDIS_REPL_TRANSFER 4 /* Receiving .rdb from master */
 #define REDIS_REPL_CONNECTED 5 /* Connected to master */
+
 
 /* Slave replication state - from the point of view of the master.
  * In SEND_BULK and ONLINE state the slave receives new updates
@@ -1189,12 +1191,16 @@ struct redisServer {
     // 最近一次执行 fsync 时的偏移量
     // 用于 sync_file_range 函数
     off_t repl_transfer_last_fsync_off; /* Offset when we fsync-ed last time. */
+
     // 主服务器的套接字
     int repl_transfer_s;     /* Slave -> Master SYNC socket */
+
     // 保存 RDB 文件的临时文件的描述符
     int repl_transfer_fd;    /* Slave -> Master SYNC temp file descriptor */
+
     // 保存 RDB 文件的临时文件名字
     char *repl_transfer_tmpfile; /* Slave-> master SYNC temp file name */
+
     // 最近一次读入 RDB 内容的时间
     time_t repl_transfer_lastio; /* Unix time of the latest read, for timeout */
     int repl_serve_stale_data; /* Serve stale data when link is down? */
